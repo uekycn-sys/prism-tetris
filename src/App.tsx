@@ -375,6 +375,13 @@ export function App() {
     setSettings((prev) => ({ ...prev, showGhostPiece: !prev.showGhostPiece }));
   }, []);
 
+  const toggleOneHandSide = useCallback(() => {
+    setSettings((prev) => ({
+      ...prev,
+      touchLayout: prev.touchLayout === 'one-hand-left' ? 'one-hand-right' : 'one-hand-left',
+    }));
+  }, []);
+
   const handleTouchHardDrop = useCallback(() => {
     const now = performance.now();
     if (now - lastTouchHardDropAtRef.current < 115) return;
@@ -530,7 +537,7 @@ export function App() {
   }, [pauseGame]);
 
   return (
-    <div className="app-backdrop h-dvh w-screen overflow-hidden">
+    <div className="app-backdrop h-full w-full overflow-hidden">
       {hud.status === 'menu' ? (
         <MainMenu
           settings={settings}
@@ -561,9 +568,11 @@ export function App() {
           onRotateCW={handleTouchRotateCW}
           touchControls={
             <TouchControls
+              layout={settings.touchLayout}
               lift={settings.touchControlLift}
               swapped={settings.swapTouchHandedness}
               visible={settings.showTouchControls}
+              onToggleOneHandSide={toggleOneHandSide}
               onPressLeft={() => {
                 soundRef.current?.unlock();
                 inputRef.current?.pressLeft();

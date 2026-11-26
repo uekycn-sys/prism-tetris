@@ -5,6 +5,7 @@ import type {
   LeaderboardEntry,
   Settings,
   TouchControlLift,
+  TouchLayoutMode,
 } from '../types/game';
 
 const SETTINGS_KEY = 'prism_tetris_settings_v1';
@@ -41,6 +42,7 @@ export const DEFAULT_SETTINGS: Settings = {
   colorblind: false,
   screenShake: true,
   showGhostPiece: false,
+  touchLayout: 'one-hand-right',
   touchControlLift: 'comfort',
   touchGestures: true,
   showTouchControls: true,
@@ -71,6 +73,12 @@ export function loadSettings(): Settings {
     const raw = window.localStorage.getItem(SETTINGS_KEY);
     if (!raw) return DEFAULT_SETTINGS;
     const parsed = JSON.parse(raw) as Partial<Settings>;
+    const validLayout: TouchLayoutMode =
+      parsed.touchLayout === 'one-hand-right' ||
+      parsed.touchLayout === 'one-hand-left' ||
+      parsed.touchLayout === 'two-hand'
+        ? parsed.touchLayout
+        : DEFAULT_SETTINGS.touchLayout;
     const validLift: TouchControlLift =
       parsed.touchControlLift === 'compact' ||
       parsed.touchControlLift === 'comfort' ||
@@ -80,6 +88,7 @@ export function loadSettings(): Settings {
     return {
       ...DEFAULT_SETTINGS,
       ...parsed,
+      touchLayout: validLayout,
       touchControlLift: validLift,
       handling: {
         ...DEFAULT_SETTINGS.handling,

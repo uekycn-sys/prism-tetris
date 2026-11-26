@@ -81,6 +81,7 @@ export function GameLayout({
 
     const computeSize = () => {
       const rect = el.getBoundingClientRect();
+      if (rect.width < 40 || rect.height < 80) return;
       // 10 cols x 20.55 rows, subtract 4px for 2px board border on each side
       const maxCellH = Math.floor((rect.height - 4) / 20.6);
       const maxCellW = Math.floor((rect.width - 4) / 10);
@@ -106,12 +107,13 @@ export function GameLayout({
       ro.disconnect();
       window.visualViewport?.removeEventListener('resize', scheduleCompute);
     };
-  }, [onResizeBoard, settings.showTouchControls, settings.touchControlLift]);
+  }, [onResizeBoard, settings.showTouchControls, settings.touchControlLift, settings.touchLayout]);
 
   const handleBoardPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!settings.touchGestures || hud.status !== 'playing' || e.pointerType !== 'touch') {
       return;
     }
+    e.preventDefault();
     if (gestureRef.current) return;
     e.currentTarget.setPointerCapture?.(e.pointerId);
     gestureRef.current = {
@@ -130,8 +132,8 @@ export function GameLayout({
     const g = gestureRef.current;
     if (!g || g.pointerId !== e.pointerId) return;
 
-    const stepX = Math.max(20, cellSizeRef.current * 0.92);
-    const stepY = Math.max(22, cellSizeRef.current * 0.95);
+    const stepX = Math.max(18, cellSizeRef.current * 0.78);
+    const stepY = Math.max(20, cellSizeRef.current * 0.85);
     const dxFromAnchor = e.clientX - g.anchorX;
     const dyFromAnchor = e.clientY - g.anchorY;
 
@@ -171,19 +173,19 @@ export function GameLayout({
     const totalDy = e.clientY - g.startY;
     const dt = performance.now() - g.startTime;
 
-    if (!g.movedX && !g.movedY && Math.hypot(totalDx, totalDy) < 12 && dt < 260) {
+    if (!g.movedX && !g.movedY && Math.hypot(totalDx, totalDy) < 18 && dt < 300) {
       onRotateCW();
     } else if (
       !g.movedX &&
-      totalDy >= 52 &&
-      dt <= 170 &&
-      Math.abs(totalDy) > Math.abs(totalDx) * 1.8
+      totalDy >= 42 &&
+      dt <= 220 &&
+      Math.abs(totalDy) > Math.abs(totalDx) * 1.6
     ) {
       onHardDropTouch();
     } else if (
       !g.movedX &&
-      totalDy <= -56 &&
-      Math.abs(totalDy) > Math.abs(totalDx) * 1.8
+      totalDy <= -48 &&
+      Math.abs(totalDy) > Math.abs(totalDx) * 1.6
     ) {
       onHold();
     }
@@ -212,7 +214,7 @@ export function GameLayout({
 
   return (
     <div
-      className="flex h-dvh w-screen flex-col overflow-hidden"
+      className="flex h-full w-full flex-col overflow-hidden"
       style={{ paddingTop: 'var(--sat)' }}
     >
       {/* Mobile Compact Header (< md) */}
@@ -406,34 +408,36 @@ export function GameLayout({
         {/* Center Playfield Canvas */}
         <div
           ref={stageRef}
-          className="relative flex h-full min-h-0 flex-1 items-center justify-center md:max-w-[460px]"
+          className="relative h-full min-h-0 flex-1 md:max-w-[460px]"
+          style={{ touchAction: 'none' }}
+          onPointerDown={handleBoardPointerDown}
+          onPointerMove={handleBoardPointerMove}
+          onPointerUp={handleBoardPointerUp}
+          onPointerCancel={handleBoardPointerCancel}
         >
-          <div
-            className="relative overflow-hidden rounded-2xl"
-            style={{
-              border: '2px solid var(--board-frame)',
-              boxShadow: 'var(--board-glow)',
-              touchAction: 'none',
-            }}
-            onPointerDown={handleBoardPointerDown}
-            onPointerMove={handleBoardPointerMove}
-            onPointerUp={handleBoardPointerUp}
-            onPointerCancel={handleBoardPointerCancel}
-          >
-            <CalloutOverlay callouts={callouts} themeId={settings.theme} />
-            <canvas ref={canvasRef} className="block" />
-            {/* Lock delay subtle bottom indicator */}
-            {hud.isGrounded && (
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-black/30">
-                <div
-                  className="h-full transition-[width] duration-75"
-                  style={{
-                    width: `${Math.round(hud.lockProgress * 100)}%`,
-                    background: hud.lockProgress > 0.7 ? 'var(--danger)' : 'var(--accent)',
-                  }}
-                />
-              </div>
-            )}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div
+              className="relative overflow-hidden rounded-2xl"
+              style={{
+                border: '2px solid var(--board-frame)',
+                boxShadow: 'var(--board-glow)',
+              }}
+            >
+              <CalloutOverlay callouts={callouts} themeId={settings.theme} />
+              <canvas ref={canvasRef} className="block" />
+              {/* Lock delay subtle bottom indicator */}
+              {hud.isGrounded && (
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-black/30">
+                  <div
+                    className="h-full transition-[width] duration-75"
+                    style={{
+                      width: `${Math.round(hud.lockProgress * 100)}%`,
+                      background: hud.lockProgress > 0.7 ? 'var(--danger)' : 'var(--accent)',
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

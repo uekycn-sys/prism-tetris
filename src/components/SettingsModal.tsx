@@ -8,7 +8,7 @@ import {
   WASD_KEY_BINDINGS,
 } from '../storage/persistence';
 import { THEME_ORDER, THEMES } from '../renderer/themes';
-import type { ActionName, Settings, TouchControlLift } from '../types/game';
+import type { ActionName, Settings, TouchControlLift, TouchLayoutMode } from '../types/game';
 
 interface SettingsModalProps {
   settings: Settings;
@@ -33,6 +33,12 @@ const LIFT_OPTIONS: { value: TouchControlLift; label: string }[] = [
   { value: 'compact', label: '紧凑' },
   { value: 'comfort', label: '舒适抬高' },
   { value: 'high', label: '高位' },
+];
+
+const LAYOUT_OPTIONS: { value: TouchLayoutMode; label: string }[] = [
+  { value: 'one-hand-right', label: '右手单手' },
+  { value: 'one-hand-left', label: '左手单手' },
+  { value: 'two-hand', label: '双手分屏' },
 ];
 
 export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProps) {
@@ -182,6 +188,32 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
               </h3>
               <div className="glass-panel space-y-3 rounded-2xl p-3">
                 <div>
+                  <div className="mb-1.5 text-xs font-medium">操控模式</div>
+                  <div className="flex gap-1.5">
+                    {LAYOUT_OPTIONS.map((opt) => {
+                      const active = settings.touchLayout === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => onUpdate({ ...settings, touchLayout: opt.value })}
+                          className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold transition-all ${
+                            active ? '' : 'bg-black/15 text-[var(--text-secondary)]'
+                          }`}
+                          style={
+                            active
+                              ? { background: 'var(--accent)', color: 'var(--accent-text)' }
+                              : undefined
+                          }
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
                   <div className="mb-1.5 text-xs font-medium">触控区底部抬升</div>
                   <div className="flex gap-1.5">
                     {LIFT_OPTIONS.map((opt) => {
@@ -207,39 +239,41 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
                   </div>
                 </div>
 
-                <div>
-                  <div className="mb-1.5 text-xs font-medium">左右手布局</div>
-                  <div className="flex gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => onUpdate({ ...settings, swapTouchHandedness: false })}
-                      className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold transition-all ${
-                        !settings.swapTouchHandedness ? '' : 'bg-black/15 text-[var(--text-secondary)]'
-                      }`}
-                      style={
-                        !settings.swapTouchHandedness
-                          ? { background: 'var(--accent)', color: 'var(--accent-text)' }
-                          : undefined
-                      }
-                    >
-                      左手移动
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onUpdate({ ...settings, swapTouchHandedness: true })}
-                      className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold transition-all ${
-                        settings.swapTouchHandedness ? '' : 'bg-black/15 text-[var(--text-secondary)]'
-                      }`}
-                      style={
-                        settings.swapTouchHandedness
-                          ? { background: 'var(--accent)', color: 'var(--accent-text)' }
-                          : undefined
-                      }
-                    >
-                      右手移动
-                    </button>
+                {settings.touchLayout === 'two-hand' && (
+                  <div>
+                    <div className="mb-1.5 text-xs font-medium">双手左右布局</div>
+                    <div className="flex gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => onUpdate({ ...settings, swapTouchHandedness: false })}
+                        className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold transition-all ${
+                          !settings.swapTouchHandedness ? '' : 'bg-black/15 text-[var(--text-secondary)]'
+                        }`}
+                        style={
+                          !settings.swapTouchHandedness
+                            ? { background: 'var(--accent)', color: 'var(--accent-text)' }
+                            : undefined
+                        }
+                      >
+                        左手移动
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onUpdate({ ...settings, swapTouchHandedness: true })}
+                        className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold transition-all ${
+                          settings.swapTouchHandedness ? '' : 'bg-black/15 text-[var(--text-secondary)]'
+                        }`}
+                        style={
+                          settings.swapTouchHandedness
+                            ? { background: 'var(--accent)', color: 'var(--accent-text)' }
+                            : undefined
+                        }
+                      >
+                        右手移动
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <label className="flex cursor-pointer items-start justify-between gap-2 text-xs">
                   <div>

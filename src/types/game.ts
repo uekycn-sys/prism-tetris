@@ -10,6 +10,8 @@ export type ThemeId = 'neon-prism' | 'zen-frost' | 'retro-phosphor';
 
 export type TouchControlLift = 'compact' | 'comfort' | 'high';
 
+export type TouchLayoutMode = 'one-hand-right' | 'one-hand-left' | 'two-hand';
+
 export type TSpinType = 'none' | 'mini' | 'full';
 
 export type ActionName =
@@ -40,6 +42,7 @@ export interface Settings {
   colorblind: boolean;
   screenShake: boolean;
   showGhostPiece: boolean;
+  touchLayout: TouchLayoutMode;
   touchControlLift: TouchControlLift;
   touchGestures: boolean;
   showTouchControls: boolean;

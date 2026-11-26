@@ -85,13 +85,13 @@ export function MainMenu({
 
   return (
     <div
-      className="relative flex h-dvh w-screen flex-col items-center justify-center overflow-hidden px-3 sm:px-6"
+      className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden px-3 sm:px-6"
       style={{
         paddingTop: 'max(0.75rem, var(--sat))',
         paddingBottom: 'max(0.75rem, var(--sab))',
       }}
     >
-      <div className="glass-modal animate-modal modal-scroll flex max-h-full w-full max-w-4xl flex-col gap-4 overflow-y-auto rounded-3xl p-4 sm:gap-6 sm:p-7">
+      <div className="glass-modal modal-scroll flex max-h-full w-full max-w-4xl flex-col gap-4 overflow-y-auto rounded-3xl p-4 sm:gap-6 sm:p-7">
         {/* Header Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>

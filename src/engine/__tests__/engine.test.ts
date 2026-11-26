@@ -299,8 +299,9 @@ describe('TetrisEngine Lock Delay & Game Modes', () => {
 });
 
 describe('Default Settings', () => {
-  it('disables ghost piece by default and uses comfort touch control lift', () => {
+  it('disables ghost piece by default and uses one-hand-right comfort touch controls', () => {
     expect(DEFAULT_SETTINGS.showGhostPiece).toBe(false);
+    expect(DEFAULT_SETTINGS.touchLayout).toBe('one-hand-right');
     expect(DEFAULT_SETTINGS.touchControlLift).toBe('comfort');
     expect(DEFAULT_SETTINGS.touchGestures).toBe(true);
     expect(DEFAULT_SETTINGS.showTouchControls).toBe(true);

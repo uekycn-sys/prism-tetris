@@ -8,19 +8,47 @@
     />
     <meta name="theme-color" content="#060913" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="棱镜方块" />
     <title>PRISM TETRIS · 棱镜方块</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
-      rel="stylesheet"
-    />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #060913;
+      }
+    </style>
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem('prism_tetris_settings_v1');
+          if (!raw) return;
+          var parsed = JSON.parse(raw);
+          var theme = parsed && parsed.theme;
+          var colors = {
+            'neon-prism': '#060913',
+            'zen-frost': '#eef1f5',
+            'retro-phosphor': '#050b06',
+          };
+          if (theme && colors[theme]) {
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.style.backgroundColor = colors[theme];
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', colors[theme]);
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
