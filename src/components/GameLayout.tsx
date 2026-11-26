@@ -1,5 +1,7 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import {
+  Eye,
+  EyeOff,
   Palette,
   Pause,
   RotateCcw,
@@ -22,10 +24,28 @@ interface GameLayoutProps {
   onResizeBoard: (cellSize: number) => void;
   onCycleTheme: () => void;
   onToggleMute: () => void;
+  onToggleGhost: () => void;
   onOpenSettings: () => void;
   onPause: () => void;
   onRestart: () => void;
+  onHold: () => void;
+  onMoveLeft: () => void;
+  onMoveRight: () => void;
+  onSoftDropStep: () => void;
+  onHardDropTouch: () => void;
+  onRotateCW: () => void;
   touchControls: ReactNode;
+}
+
+interface GestureState {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  anchorX: number;
+  anchorY: number;
+  startTime: number;
+  movedX: boolean;
+  movedY: boolean;
 }
 
 export function GameLayout({
@@ -36,12 +56,21 @@ export function GameLayout({
   onResizeBoard,
   onCycleTheme,
   onToggleMute,
+  onToggleGhost,
   onOpenSettings,
   onPause,
   onRestart,
+  onHold,
+  onMoveLeft,
+  onMoveRight,
+  onSoftDropStep,
+  onHardDropTouch,
+  onRotateCW,
   touchControls,
 }: GameLayoutProps) {
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const cellSizeRef = useRef(24);
+  const gestureRef = useRef<GestureState | null>(null);
 
   useEffect(() => {
     const el = stageRef.current;
@@ -52,12 +81,13 @@ export function GameLayout({
 
     const computeSize = () => {
       const rect = el.getBoundingClientRect();
-      // 10 cols x 20.55 rows
-      const maxCellH = Math.floor((rect.height - 12) / 20.6);
-      const maxCellW = Math.floor((rect.width - 12) / 10);
-      const cell = Math.max(14, Math.min(36, maxCellH, maxCellW));
+      // 10 cols x 20.55 rows, subtract 4px for 2px board border on each side
+      const maxCellH = Math.floor((rect.height - 4) / 20.6);
+      const maxCellW = Math.floor((rect.width - 4) / 10);
+      const cell = Math.max(14, Math.min(40, maxCellH, maxCellW));
       if (cell !== lastCell) {
         lastCell = cell;
+        cellSizeRef.current = cell;
         onResizeBoard(cell);
       }
     };
@@ -70,11 +100,100 @@ export function GameLayout({
     computeSize();
     const ro = new ResizeObserver(scheduleCompute);
     ro.observe(el);
+    window.visualViewport?.addEventListener('resize', scheduleCompute);
     return () => {
       if (rafId) window.cancelAnimationFrame(rafId);
       ro.disconnect();
+      window.visualViewport?.removeEventListener('resize', scheduleCompute);
     };
-  }, [onResizeBoard]);
+  }, [onResizeBoard, settings.showTouchControls, settings.touchControlLift]);
+
+  const handleBoardPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!settings.touchGestures || hud.status !== 'playing' || e.pointerType !== 'touch') {
+      return;
+    }
+    if (gestureRef.current) return;
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    gestureRef.current = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      anchorX: e.clientX,
+      anchorY: e.clientY,
+      startTime: performance.now(),
+      movedX: false,
+      movedY: false,
+    };
+  };
+
+  const handleBoardPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const g = gestureRef.current;
+    if (!g || g.pointerId !== e.pointerId) return;
+
+    const stepX = Math.max(20, cellSizeRef.current * 0.92);
+    const stepY = Math.max(22, cellSizeRef.current * 0.95);
+    const dxFromAnchor = e.clientX - g.anchorX;
+    const dyFromAnchor = e.clientY - g.anchorY;
+
+    if (Math.abs(dxFromAnchor) >= stepX) {
+      while (e.clientX - g.anchorX >= stepX) {
+        g.anchorX += stepX;
+        g.movedX = true;
+        onMoveRight();
+      }
+      while (g.anchorX - e.clientX >= stepX) {
+        g.anchorX -= stepX;
+        g.movedX = true;
+        onMoveLeft();
+      }
+    }
+
+    const totalDx = e.clientX - g.startX;
+    const totalDy = e.clientY - g.startY;
+    if (
+      dyFromAnchor >= stepY &&
+      (!g.movedX || Math.abs(totalDy) > Math.abs(totalDx) * 1.25)
+    ) {
+      while (e.clientY - g.anchorY >= stepY) {
+        g.anchorY += stepY;
+        g.movedY = true;
+        onSoftDropStep();
+      }
+    }
+  };
+
+  const handleBoardPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const g = gestureRef.current;
+    if (!g || g.pointerId !== e.pointerId) return;
+    gestureRef.current = null;
+
+    const totalDx = e.clientX - g.startX;
+    const totalDy = e.clientY - g.startY;
+    const dt = performance.now() - g.startTime;
+
+    if (!g.movedX && !g.movedY && Math.hypot(totalDx, totalDy) < 12 && dt < 260) {
+      onRotateCW();
+    } else if (
+      !g.movedX &&
+      totalDy >= 52 &&
+      dt <= 170 &&
+      Math.abs(totalDy) > Math.abs(totalDx) * 1.8
+    ) {
+      onHardDropTouch();
+    } else if (
+      !g.movedX &&
+      totalDy <= -56 &&
+      Math.abs(totalDy) > Math.abs(totalDx) * 1.8
+    ) {
+      onHold();
+    }
+  };
+
+  const handleBoardPointerCancel = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (gestureRef.current?.pointerId === e.pointerId) {
+      gestureRef.current = null;
+    }
+  };
 
   const timeDisplay =
     hud.mode === 'ultra' ? formatDurationMs(hud.remainingMs) : formatDurationMs(hud.elapsedMs);
@@ -92,10 +211,13 @@ export function GameLayout({
     hud.mode === 'sprint' ? `${hud.lines} / ${SPRINT_TARGET_LINES}` : `${hud.lines}`;
 
   return (
-    <div className="flex h-dvh w-screen flex-col overflow-hidden">
+    <div
+      className="flex h-dvh w-screen flex-col overflow-hidden"
+      style={{ paddingTop: 'var(--sat)' }}
+    >
       {/* Mobile Compact Header (< md) */}
-      <header className="glass-panel mx-2 mt-2 flex shrink-0 items-center justify-between rounded-2xl px-3 py-1.5 md:hidden">
-        <div className="flex items-center gap-3">
+      <header className="glass-panel mx-2 mt-1.5 flex shrink-0 items-center justify-between rounded-2xl px-2.5 py-1 md:hidden">
+        <div className="flex items-center gap-2">
           <div>
             <div className="text-[9px] font-bold tracking-wider text-[var(--accent)]">
               {modeLabel}
@@ -114,12 +236,29 @@ export function GameLayout({
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
+          <button
+            type="button"
+            onClick={onToggleGhost}
+            aria-label="落点提示开关"
+            title={settings.showGhostPiece ? '关闭落点提示' : '开启落点提示'}
+            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
+              settings.showGhostPiece
+                ? 'bg-[var(--accent)]/15 text-[var(--accent)]'
+                : 'text-[var(--text-secondary)] hover:bg-white/10'
+            }`}
+          >
+            {settings.showGhostPiece ? (
+              <Eye className="h-4 w-4" />
+            ) : (
+              <EyeOff className="h-4 w-4" />
+            )}
+          </button>
           <button
             type="button"
             onClick={onCycleTheme}
             aria-label="切换主题"
-            className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10"
+            className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/10"
           >
             <Palette className="h-4 w-4" />
           </button>
@@ -127,15 +266,23 @@ export function GameLayout({
             type="button"
             onClick={onToggleMute}
             aria-label="静音开关"
-            className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10"
+            className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/10"
           >
             {settings.muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
           </button>
           <button
             type="button"
+            onClick={onOpenSettings}
+            aria-label="游戏设置"
+            className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/10"
+          >
+            <SettingsIcon className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
             onClick={onPause}
             aria-label="暂停游戏"
-            className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10"
+            className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/10"
           >
             <Pause className="h-4 w-4" />
           </button>
@@ -143,12 +290,16 @@ export function GameLayout({
       </header>
 
       {/* Main Responsive Stage */}
-      <main className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 items-center justify-center gap-3 px-2 py-1.5 md:gap-6 md:px-6 md:py-5">
+      <main className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 items-center justify-center gap-1.5 px-1.5 py-1 md:gap-6 md:px-6 md:py-5">
         {/* Desktop Left Rail */}
-        <aside className="hidden h-full max-h-[700px] w-48 shrink-0 flex-col justify-between md:flex lg:w-52">
+        <aside className="hidden h-full max-h-[760px] w-48 shrink-0 flex-col justify-between md:flex lg:w-52">
           <div className="space-y-3">
             {/* Hold Box */}
-            <div className="glass-panel rounded-2xl p-3">
+            <button
+              type="button"
+              onClick={onHold}
+              className="glass-panel w-full rounded-2xl p-3 text-left transition-colors hover:bg-white/5"
+            >
               <div className="flex items-center justify-between">
                 <span className="font-display text-[11px] font-bold tracking-wider text-[var(--text-secondary)]">
                   暂存 (HOLD)
@@ -165,7 +316,7 @@ export function GameLayout({
                   cellSize={17}
                 />
               </div>
-            </div>
+            </button>
 
             {/* Telemetry Cards */}
             <div className="glass-panel space-y-2.5 rounded-2xl p-3.5">
@@ -252,40 +403,24 @@ export function GameLayout({
           </div>
         </aside>
 
-        {/* Mobile Left Mini Strip (Hold) */}
-        <div className="flex h-full flex-col items-center justify-start gap-2 pt-1 md:hidden">
-          <div className="glass-panel flex flex-col items-center rounded-xl p-1.5">
-            <span className="text-[9px] font-bold text-[var(--text-muted)]">暂存</span>
-            <MiniPieceCanvas
-              piece={hud.holdPiece}
-              themeId={settings.theme}
-              colorblind={settings.colorblind}
-              dimmed={hud.holdUsed}
-              size={44}
-              cellSize={9}
-            />
-          </div>
-          <div className="glass-panel flex flex-col items-center rounded-xl px-2 py-1.5 text-center">
-            <span className="text-[9px] text-[var(--text-muted)]">等级</span>
-            <span className="font-mono-num text-xs font-bold">{hud.level}</span>
-            <span className="mt-1 text-[9px] text-[var(--text-muted)]">PPS</span>
-            <span className="font-mono-num text-[11px] font-semibold">{hud.pps.toFixed(1)}</span>
-          </div>
-        </div>
-
         {/* Center Playfield Canvas */}
         <div
           ref={stageRef}
-          className="relative flex h-full min-h-0 flex-1 items-center justify-center md:max-w-[420px]"
+          className="relative flex h-full min-h-0 flex-1 items-center justify-center md:max-w-[460px]"
         >
           <div
             className="relative overflow-hidden rounded-2xl"
             style={{
               border: '2px solid var(--board-frame)',
               boxShadow: 'var(--board-glow)',
+              touchAction: 'none',
             }}
+            onPointerDown={handleBoardPointerDown}
+            onPointerMove={handleBoardPointerMove}
+            onPointerUp={handleBoardPointerUp}
+            onPointerCancel={handleBoardPointerCancel}
           >
-            <CalloutOverlay callouts={callouts} />
+            <CalloutOverlay callouts={callouts} themeId={settings.theme} />
             <canvas ref={canvasRef} className="block" />
             {/* Lock delay subtle bottom indicator */}
             {hud.isGrounded && (
@@ -302,9 +437,28 @@ export function GameLayout({
           </div>
         </div>
 
-        {/* Mobile Right Mini Strip (Next 4) */}
-        <div className="flex h-full flex-col items-center justify-start gap-1.5 pt-1 md:hidden">
-          <div className="glass-panel flex flex-col items-center gap-1 rounded-xl p-1.5">
+        {/* Mobile Consolidated Slim Right Rail (< md) */}
+        <div className="flex h-full w-[58px] shrink-0 flex-col items-center justify-start gap-1.5 pt-0.5 md:hidden">
+          <button
+            type="button"
+            onClick={onHold}
+            aria-label="暂存方块"
+            className={`glass-panel flex w-full flex-col items-center rounded-xl p-1 active:scale-95 ${
+              !hud.holdUsed ? 'border-[var(--accent)]/30' : 'opacity-75'
+            }`}
+          >
+            <span className="text-[9px] font-bold text-[var(--text-muted)]">暂存</span>
+            <MiniPieceCanvas
+              piece={hud.holdPiece}
+              themeId={settings.theme}
+              colorblind={settings.colorblind}
+              dimmed={hud.holdUsed}
+              size={44}
+              cellSize={9}
+            />
+          </button>
+
+          <div className="glass-panel flex w-full flex-col items-center gap-1 rounded-xl p-1">
             <span className="text-[9px] font-bold text-[var(--text-muted)]">预览</span>
             {hud.nextQueue.slice(0, 4).map((p, idx) => (
               <MiniPieceCanvas
@@ -317,10 +471,27 @@ export function GameLayout({
               />
             ))}
           </div>
+
+          <div className="glass-panel flex w-full flex-col items-center rounded-xl px-1 py-1.5 text-center">
+            <span className="text-[9px] text-[var(--text-muted)]">LV {hud.level}</span>
+            <span className="font-mono-num mt-0.5 text-[10px] font-semibold">
+              {hud.pps.toFixed(1)} <span className="text-[8px] text-[var(--text-muted)]">PPS</span>
+            </span>
+            {hud.b2bActive && (
+              <span className="mt-1 rounded bg-purple-500/20 px-1 py-0.5 text-[8px] font-bold text-purple-300">
+                B2B
+              </span>
+            )}
+            {hud.combo > 0 && (
+              <span className="font-mono-num mt-0.5 rounded bg-amber-500/20 px-1 py-0.5 text-[8px] font-bold text-amber-300">
+                x{hud.combo}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Desktop Right Rail */}
-        <aside className="hidden h-full max-h-[700px] w-48 shrink-0 flex-col justify-between md:flex lg:w-52">
+        <aside className="hidden h-full max-h-[760px] w-48 shrink-0 flex-col justify-between md:flex lg:w-52">
           {/* Next Queue (5 pieces) */}
           <div className="glass-panel rounded-2xl p-3">
             <div className="flex items-center justify-between">

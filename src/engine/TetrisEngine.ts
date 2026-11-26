@@ -161,6 +161,21 @@ export class TetrisEngine {
     return !canPlace(this.board, { ...this.activePiece, y: this.activePiece.y + 1 });
   }
 
+  getLockProgress(): number {
+    return this.isGrounded() ? Math.min(1, this.lockTimerMs / LOCK_DELAY_MS) : 0;
+  }
+
+  getStackTopRow(): number {
+    for (let y = 0; y < TOTAL_ROWS; y++) {
+      for (let x = 0; x < BOARD_COLS; x++) {
+        if (this.board[y][x] !== null) {
+          return y;
+        }
+      }
+    }
+    return TOTAL_ROWS;
+  }
+
   getGhostY(): number | null {
     if (!this.activePiece) return null;
     let gy = this.activePiece.y;

@@ -84,8 +84,14 @@ export function MainMenu({
   const selectedMeta = MODES.find((m) => m.id === selectedMode)!;
 
   return (
-    <div className="relative flex h-dvh w-screen flex-col items-center justify-center overflow-hidden p-3 sm:p-6">
-      <div className="glass-modal animate-modal flex max-h-full w-full max-w-4xl flex-col gap-4 rounded-3xl p-4 sm:gap-6 sm:p-7">
+    <div
+      className="relative flex h-dvh w-screen flex-col items-center justify-center overflow-hidden px-3 sm:px-6"
+      style={{
+        paddingTop: 'max(0.75rem, var(--sat))',
+        paddingBottom: 'max(0.75rem, var(--sab))',
+      }}
+    >
+      <div className="glass-modal animate-modal modal-scroll flex max-h-full w-full max-w-4xl flex-col gap-4 overflow-y-auto rounded-3xl p-4 sm:gap-6 sm:p-7">
         {/* Header Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -264,8 +270,11 @@ export function MainMenu({
                 <Play className="h-4 w-4 fill-current" />
                 开始{selectedMeta.title}
               </button>
-              <p className="text-center text-[11px] text-[var(--text-muted)]">
+              <p className="hidden text-center text-[11px] text-[var(--text-muted)] md:block">
                 提示：方向键移动 · 空格硬降 · Z / X / A 旋转 · C 暂存
+              </p>
+              <p className="text-center text-[11px] text-[var(--text-muted)] md:hidden">
+                触控提示：棋盘滑动移动、轻点旋转、快滑硬降、上滑暂存
               </p>
             </div>
           </div>

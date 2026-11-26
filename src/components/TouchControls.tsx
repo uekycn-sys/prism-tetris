@@ -1,4 +1,4 @@
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import { useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import {
   ArrowDown,
   ArrowLeft,
@@ -8,8 +8,12 @@ import {
   RotateCcw,
   RotateCw,
 } from 'lucide-react';
+import type { TouchControlLift } from '../types/game';
 
 interface TouchControlsProps {
+  lift: TouchControlLift;
+  swapped: boolean;
+  visible: boolean;
   onPressLeft: () => void;
   onReleaseLeft: () => void;
   onPressRight: () => void;
@@ -23,22 +27,74 @@ interface TouchControlsProps {
   onHold: () => void;
 }
 
-function stopAndRun(fn: () => void) {
-  return (e: ReactPointerEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-    fn();
-  };
+const LIFT_PADDING: Record<TouchControlLift, string> = {
+  compact: 'calc(var(--sab) + 8px)',
+  comfort: 'calc(var(--sab) + 24px)',
+  high: 'calc(var(--sab) + 44px)',
+};
+
+interface TouchButtonProps {
+  label: string;
+  className: string;
+  style?: React.CSSProperties;
+  onPress: () => void;
+  onRelease?: () => void;
+  children: ReactNode;
 }
 
-function stopRelease(fn: () => void) {
-  return (e: ReactPointerEvent<HTMLButtonElement>) => {
+function TouchButton({
+  label,
+  className,
+  style,
+  onPress,
+  onRelease,
+  children,
+}: TouchButtonProps) {
+  const [pressed, setPressed] = useState(false);
+
+  const handlePointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    fn();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    setPressed(true);
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate?.(6);
+      } catch {
+        // Ignore unsupported vibration errors
+      }
+    }
+    onPress();
   };
+
+  const handleRelease = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setPressed(false);
+    onRelease?.();
+  };
+
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      className={`${className} transition-transform duration-75 select-none touch-none ${
+        pressed ? 'scale-[0.94] brightness-125' : ''
+      }`}
+      style={style}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handleRelease}
+      onPointerCancel={handleRelease}
+      onLostPointerCapture={handleRelease}
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      {children}
+    </button>
+  );
 }
 
 export function TouchControls({
+  lift,
+  swapped,
+  visible,
   onPressLeft,
   onReleaseLeft,
   onPressRight,
@@ -51,102 +107,104 @@ export function TouchControls({
   onRotate180,
   onHold,
 }: TouchControlsProps) {
+  if (!visible) return null;
+
   const btnBase =
-    'glass-panel flex items-center justify-center rounded-xl active:scale-95 transition-transform select-none touch-none text-[var(--text-primary)]';
+    'glass-panel flex items-center justify-center rounded-xl text-[var(--text-primary)]';
+
+  const rowOrderClass = swapped ? 'flex-row-reverse' : '';
 
   return (
     <div
-      className="flex w-full shrink-0 flex-col gap-1.5 px-3 pb-2.5 pt-1 md:hidden"
-      style={{ touchAction: 'none' }}
+      className="flex w-full shrink-0 flex-col gap-1.5 pt-1 md:hidden"
+      style={{
+        paddingBottom: LIFT_PADDING[lift],
+        paddingLeft: 'max(0.75rem, var(--sal))',
+        paddingRight: 'max(0.75rem, var(--sar))',
+        touchAction: 'none',
+      }}
     >
-      {/* Secondary top utility row: Hold & 180° */}
-      <div className="flex w-full items-center justify-between gap-2">
-        <button
-          type="button"
-          aria-label="触控暂存"
-          className={`${btnBase} h-9 px-3.5 text-xs font-semibold tracking-wide`}
-          onPointerDown={stopAndRun(onHold)}
-        >
-          <Repeat className="mr-1.5 h-3.5 w-3.5 text-[var(--accent)]" />
-          暂存
-        </button>
-
-        <button
-          type="button"
-          aria-label="触控 180° 旋转"
-          className={`${btnBase} font-mono-num h-9 px-3.5 text-xs font-bold`}
-          onPointerDown={stopAndRun(onRotate180)}
-        >
-          180°
-        </button>
-      </div>
-
-      {/* Primary ergonomic split-thumb row */}
-      <div className="flex w-full items-center justify-between gap-2">
-        {/* Left thumb cluster: Movement & Soft Drop */}
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            aria-label="触控左移"
-            className={`${btnBase} h-12 w-12`}
-            onPointerDown={stopAndRun(onPressLeft)}
-            onPointerUp={stopRelease(onReleaseLeft)}
-            onPointerCancel={stopRelease(onReleaseLeft)}
+      {/* Row 1 (Upper / Primary Ergonomic Zone): Left/Right + Rotate CCW/CW */}
+      <div className={`flex w-full items-center gap-3 ${rowOrderClass}`}>
+        <div className="flex flex-1 items-center gap-1.5">
+          <TouchButton
+            label="触控左移"
+            className={`${btnBase} h-[52px] flex-1`}
+            onPress={onPressLeft}
+            onRelease={onReleaseLeft}
           >
             <ArrowLeft className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            aria-label="触控软降"
-            className={`${btnBase} h-12 w-12`}
-            onPointerDown={stopAndRun(onPressSoftDrop)}
-            onPointerUp={stopRelease(onReleaseSoftDrop)}
-            onPointerCancel={stopRelease(onReleaseSoftDrop)}
-          >
-            <ArrowDown className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            aria-label="触控右移"
-            className={`${btnBase} h-12 w-12`}
-            onPointerDown={stopAndRun(onPressRight)}
-            onPointerUp={stopRelease(onReleaseRight)}
-            onPointerCancel={stopRelease(onReleaseRight)}
+          </TouchButton>
+          <TouchButton
+            label="触控右移"
+            className={`${btnBase} h-[52px] flex-1`}
+            onPress={onPressRight}
+            onRelease={onReleaseRight}
           >
             <ArrowRight className="h-5 w-5" />
-          </button>
+          </TouchButton>
         </div>
 
-        {/* Right thumb cluster: Rotate CCW, Hard Drop, Rotate CW */}
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            aria-label="触控逆时针旋转"
-            className={`${btnBase} h-12 w-12`}
-            onPointerDown={stopAndRun(onRotateCCW)}
+        <div className="flex flex-1 items-center gap-1.5">
+          <TouchButton
+            label="触控逆时针旋转"
+            className={`${btnBase} h-[52px] w-[52px] shrink-0`}
+            onPress={onRotateCCW}
           >
             <RotateCcw className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            aria-label="触控硬降"
-            className="flex h-12 w-13 items-center justify-center rounded-xl font-semibold shadow-md transition-transform active:scale-95 select-none touch-none"
+          </TouchButton>
+          <TouchButton
+            label="触控顺时针旋转"
+            className={`${btnBase} h-[52px] flex-1 border-[var(--accent)]/35`}
+            onPress={onRotateCW}
+          >
+            <RotateCw className="h-5 w-5 text-[var(--accent)]" />
+          </TouchButton>
+        </div>
+      </div>
+
+      {/* Row 2 (Lower / Secondary + Drop Zone): Hold/Soft Drop + Hard Drop/180° */}
+      <div className={`flex w-full items-center gap-3 ${rowOrderClass}`}>
+        <div className="flex flex-1 items-center gap-1.5">
+          <TouchButton
+            label="触控暂存"
+            className={`${btnBase} h-[44px] w-[62px] shrink-0 text-xs font-semibold`}
+            onPress={onHold}
+          >
+            <Repeat className="mr-1 h-3.5 w-3.5 text-[var(--accent)]" />
+            暂存
+          </TouchButton>
+          <TouchButton
+            label="触控软降"
+            className={`${btnBase} h-[44px] flex-1 text-xs font-medium`}
+            onPress={onPressSoftDrop}
+            onRelease={onReleaseSoftDrop}
+          >
+            <ArrowDown className="mr-1 h-4 w-4" />
+            软降
+          </TouchButton>
+        </div>
+
+        <div className="flex flex-1 items-center gap-1.5">
+          <TouchButton
+            label="触控硬降"
+            className="flex h-[44px] flex-1 items-center justify-center rounded-xl text-xs font-bold shadow-md"
             style={{
               background: 'var(--accent)',
               color: 'var(--accent-text)',
             }}
-            onPointerDown={stopAndRun(onHardDrop)}
+            onPress={onHardDrop}
           >
-            <ChevronsDown className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            aria-label="触控顺时针旋转"
-            className={`${btnBase} h-12 w-12`}
-            onPointerDown={stopAndRun(onRotateCW)}
+            <ChevronsDown className="mr-1 h-4 w-4" />
+            硬降
+          </TouchButton>
+          <TouchButton
+            label="触控 180° 旋转"
+            className={`${btnBase} font-mono-num h-[44px] w-[52px] shrink-0 text-xs font-bold`}
+            onPress={onRotate180}
           >
-            <RotateCw className="h-5 w-5" />
-          </button>
+            180°
+          </TouchButton>
         </div>
       </div>
     </div>

@@ -8,6 +8,8 @@ export type GameStatus = 'menu' | 'playing' | 'paused' | 'gameover' | 'victory';
 
 export type ThemeId = 'neon-prism' | 'zen-frost' | 'retro-phosphor';
 
+export type TouchControlLift = 'compact' | 'comfort' | 'high';
+
 export type TSpinType = 'none' | 'mini' | 'full';
 
 export type ActionName =
@@ -37,6 +39,11 @@ export interface Settings {
   theme: ThemeId;
   colorblind: boolean;
   screenShake: boolean;
+  showGhostPiece: boolean;
+  touchControlLift: TouchControlLift;
+  touchGestures: boolean;
+  showTouchControls: boolean;
+  swapTouchHandedness: boolean;
   sfxVolume: number;
   bgmVolume: number;
   muted: boolean;

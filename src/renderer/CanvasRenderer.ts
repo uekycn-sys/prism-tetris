@@ -177,7 +177,8 @@ export class CanvasRenderer {
     engine: TetrisEngine,
     effects: EffectsManager,
     themeId: ThemeId,
-    colorblind: boolean
+    colorblind: boolean,
+    showGhostPiece = false
   ): void {
     const ctx = this.ctx;
     const theme = THEMES[themeId];
@@ -195,6 +196,18 @@ export class CanvasRenderer {
 
     // Subtle ambient stardust
     effects.renderBackground(ctx, this.cssWidth, this.cssHeight, themeId);
+
+    // Subtle top-out danger zone glow when stack nears the buffer ceiling
+    if (engine.status === 'playing' && engine.getStackTopRow() <= BUFFER_ROWS + 3) {
+      const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.008);
+      const dangerAlpha = 0.06 + pulse * 0.12;
+      const dangerHeight = cell * 2.5;
+      const dangerGrad = ctx.createLinearGradient(0, topOffset, 0, topOffset + dangerHeight);
+      dangerGrad.addColorStop(0, `rgba(244, 63, 94, ${dangerAlpha})`);
+      dangerGrad.addColorStop(1, 'rgba(244, 63, 94, 0)');
+      ctx.fillStyle = dangerGrad;
+      ctx.fillRect(0, topOffset, this.cssWidth, dangerHeight);
+    }
 
     // Apply micro shake + elastic hard-drop bump inside playfield
     ctx.save();
@@ -251,36 +264,37 @@ export class CanvasRenderer {
     // Ghost & Active Piece
     if (engine.activePiece && engine.status !== 'menu') {
       const piece = engine.activePiece;
-      const ghostY = engine.getGhostY();
       const style = getPieceStyle(theme, piece.type, colorblind);
 
-      if (ghostY !== null && ghostY > piece.y) {
-        const ghostCells = getPieceCells({ ...piece, y: ghostY });
-        ctx.save();
-        for (const [gx, gy] of ghostCells) {
-          const visY = gy - BUFFER_ROWS;
-          if (visY < -1) continue;
-          const rx = gx * cell + 1.5;
-          const ry = topOffset + visY * cell + 1.5;
-          const rs = cell - 3;
+      if (showGhostPiece) {
+        const ghostY = engine.getGhostY();
+        if (ghostY !== null && ghostY > piece.y) {
+          const ghostCells = getPieceCells({ ...piece, y: ghostY });
+          ctx.save();
+          for (const [gx, gy] of ghostCells) {
+            const visY = gy - BUFFER_ROWS;
+            if (visY < -1) continue;
+            const rx = gx * cell + 1.5;
+            const ry = topOffset + visY * cell + 1.5;
+            const rs = cell - 3;
 
-          ctx.globalAlpha = theme.ghostFillAlpha;
-          ctx.fillStyle = style.base;
-          ctx.beginPath();
-          ctx.roundRect(rx, ry, rs, rs, theme.pixelArt ? 0 : 3);
-          ctx.fill();
+            ctx.globalAlpha = theme.ghostFillAlpha * 0.85;
+            ctx.fillStyle = style.base;
+            ctx.beginPath();
+            ctx.roundRect(rx, ry, rs, rs, theme.pixelArt ? 0 : 3);
+            ctx.fill();
 
-          ctx.globalAlpha = 0.6;
-          ctx.strokeStyle = style.base;
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
+            ctx.globalAlpha = 0.42;
+            ctx.strokeStyle = style.base;
+            ctx.lineWidth = 1.25;
+            ctx.stroke();
+          }
+          ctx.restore();
         }
-        ctx.restore();
       }
 
       const activeCells = getPieceCells(piece);
-      const snapshot = engine.getHudSnapshot();
-      const lockPulse = snapshot.isGrounded ? snapshot.lockProgress : 0;
+      const lockPulse = engine.getLockProgress();
 
       for (const [ax, ay] of activeCells) {
         const visY = ay - BUFFER_ROWS;

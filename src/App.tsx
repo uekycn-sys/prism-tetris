@@ -76,6 +76,7 @@ export function App() {
   const settingsRef = useRef<Settings>(settings);
   const settingsOpenRef = useRef(settingsOpen);
   const calloutSeqRef = useRef(1);
+  const lastTouchHardDropAtRef = useRef(0);
 
   settingsRef.current = settings;
   settingsOpenRef.current = settingsOpen;
@@ -83,6 +84,14 @@ export function App() {
   // Apply theme to root document and persist settings
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', settings.theme);
+    const themeColorMap: Record<ThemeId, string> = {
+      'neon-prism': '#060913',
+      'zen-frost': '#eef1f5',
+      'retro-phosphor': '#050b06',
+    };
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', themeColorMap[settings.theme]);
     saveSettings(settings);
     soundRef.current?.configure({
       sfxVolume: settings.sfxVolume,
@@ -268,7 +277,8 @@ export function App() {
           engine,
           effects,
           settingsRef.current.theme,
-          settingsRef.current.colorblind
+          settingsRef.current.colorblind,
+          settingsRef.current.showGhostPiece
         );
       }
 
@@ -361,6 +371,49 @@ export function App() {
     setSettings((prev) => ({ ...prev, muted: !prev.muted }));
   }, []);
 
+  const toggleGhostPiece = useCallback(() => {
+    setSettings((prev) => ({ ...prev, showGhostPiece: !prev.showGhostPiece }));
+  }, []);
+
+  const handleTouchHardDrop = useCallback(() => {
+    const now = performance.now();
+    if (now - lastTouchHardDropAtRef.current < 115) return;
+    lastTouchHardDropAtRef.current = now;
+    soundRef.current?.unlock();
+    const engine = engineRef.current;
+    if (!engine) return;
+    engine.hardDrop();
+    setHud(engine.getHudSnapshot());
+  }, []);
+
+  const handleTouchHold = useCallback(() => {
+    soundRef.current?.unlock();
+    const engine = engineRef.current;
+    if (!engine) return;
+    engine.hold();
+    setHud(engine.getHudSnapshot());
+  }, []);
+
+  const handleTouchRotateCW = useCallback(() => {
+    soundRef.current?.unlock();
+    engineRef.current?.rotate('cw');
+  }, []);
+
+  const handleTouchMoveLeft = useCallback(() => {
+    soundRef.current?.unlock();
+    engineRef.current?.move(-1);
+  }, []);
+
+  const handleTouchMoveRight = useCallback(() => {
+    soundRef.current?.unlock();
+    engineRef.current?.move(1);
+  }, []);
+
+  const handleTouchSoftDropStep = useCallback(() => {
+    soundRef.current?.unlock();
+    engineRef.current?.softDropStep();
+  }, []);
+
     // Global keyboard bindings
   useEffect(() => {
     const findAction = (code: string): ActionName | null => {
@@ -448,13 +501,24 @@ export function App() {
       }
     };
 
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        inputRef.current?.reset();
+        if (engineRef.current?.status === 'playing') {
+          pauseGame();
+        }
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     window.addEventListener('blur', handleBlur);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
       window.removeEventListener('blur', handleBlur);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [pauseGame, resumeGame, restartCurrent]);
 
@@ -485,11 +549,21 @@ export function App() {
           onResizeBoard={handleResizeBoard}
           onCycleTheme={cycleTheme}
           onToggleMute={toggleMute}
+          onToggleGhost={toggleGhostPiece}
           onOpenSettings={handleOpenSettings}
           onPause={pauseGame}
           onRestart={restartCurrent}
+          onHold={handleTouchHold}
+          onMoveLeft={handleTouchMoveLeft}
+          onMoveRight={handleTouchMoveRight}
+          onSoftDropStep={handleTouchSoftDropStep}
+          onHardDropTouch={handleTouchHardDrop}
+          onRotateCW={handleTouchRotateCW}
           touchControls={
             <TouchControls
+              lift={settings.touchControlLift}
+              swapped={settings.swapTouchHandedness}
+              visible={settings.showTouchControls}
               onPressLeft={() => {
                 soundRef.current?.unlock();
                 inputRef.current?.pressLeft();
@@ -505,15 +579,8 @@ export function App() {
                 inputRef.current?.pressSoftDrop();
               }}
               onReleaseSoftDrop={() => inputRef.current?.releaseSoftDrop()}
-              onHardDrop={() => {
-                soundRef.current?.unlock();
-                engineRef.current?.hardDrop();
-                setHud(engineRef.current!.getHudSnapshot());
-              }}
-              onRotateCW={() => {
-                soundRef.current?.unlock();
-                engineRef.current?.rotate('cw');
-              }}
+              onHardDrop={handleTouchHardDrop}
+              onRotateCW={handleTouchRotateCW}
               onRotateCCW={() => {
                 soundRef.current?.unlock();
                 engineRef.current?.rotate('ccw');
@@ -522,11 +589,7 @@ export function App() {
                 soundRef.current?.unlock();
                 engineRef.current?.rotate('180');
               }}
-              onHold={() => {
-                soundRef.current?.unlock();
-                engineRef.current?.hold();
-                setHud(engineRef.current!.getHudSnapshot());
-              }}
+              onHold={handleTouchHold}
             />
           }
         />

@@ -11,6 +11,7 @@ import {
 import { calculateClearScore } from '../scoring';
 import { canPlace, detectTSpin, tryRotate } from '../srs';
 import { TetrisEngine } from '../TetrisEngine';
+import { DEFAULT_SETTINGS } from '../../storage/persistence';
 import type { ActivePiece, BoardGrid, PieceType } from '../../types/game';
 
 function emptyBoard(): BoardGrid {
@@ -277,5 +278,32 @@ describe('TetrisEngine Lock Delay & Game Modes', () => {
     expect(engine.status).toBe('playing');
     expect(zenCleared).toBe(true);
     expect(engine.activePiece).not.toBeNull();
+  });
+
+  it('tracks getLockProgress and getStackTopRow accurately', () => {
+    const engine = new TetrisEngine(() => 0.1);
+    engine.start('marathon');
+
+    expect(engine.getStackTopRow()).toBe(TOTAL_ROWS);
+    expect(engine.getLockProgress()).toBe(0);
+
+    engine.softDropToFloor();
+    expect(engine.isGrounded()).toBe(true);
+    advanceEngine(engine, LOCK_DELAY_MS / 2);
+    expect(engine.getLockProgress()).toBeCloseTo(0.5, 2);
+
+    engine.hardDrop();
+    expect(engine.getStackTopRow()).toBeLessThan(TOTAL_ROWS);
+    expect(engine.getLockProgress()).toBe(0);
+  });
+});
+
+describe('Default Settings', () => {
+  it('disables ghost piece by default and uses comfort touch control lift', () => {
+    expect(DEFAULT_SETTINGS.showGhostPiece).toBe(false);
+    expect(DEFAULT_SETTINGS.touchControlLift).toBe('comfort');
+    expect(DEFAULT_SETTINGS.touchGestures).toBe(true);
+    expect(DEFAULT_SETTINGS.showTouchControls).toBe(true);
+    expect(DEFAULT_SETTINGS.swapTouchHandedness).toBe(false);
   });
 });

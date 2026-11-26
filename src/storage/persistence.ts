@@ -4,6 +4,7 @@ import type {
   KeyBindings,
   LeaderboardEntry,
   Settings,
+  TouchControlLift,
 } from '../types/game';
 
 const SETTINGS_KEY = 'prism_tetris_settings_v1';
@@ -39,6 +40,11 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'neon-prism',
   colorblind: false,
   screenShake: true,
+  showGhostPiece: false,
+  touchControlLift: 'comfort',
+  touchGestures: true,
+  showTouchControls: true,
+  swapTouchHandedness: false,
   sfxVolume: 0.7,
   bgmVolume: 0.25,
   muted: false,
@@ -65,9 +71,16 @@ export function loadSettings(): Settings {
     const raw = window.localStorage.getItem(SETTINGS_KEY);
     if (!raw) return DEFAULT_SETTINGS;
     const parsed = JSON.parse(raw) as Partial<Settings>;
+    const validLift: TouchControlLift =
+      parsed.touchControlLift === 'compact' ||
+      parsed.touchControlLift === 'comfort' ||
+      parsed.touchControlLift === 'high'
+        ? parsed.touchControlLift
+        : DEFAULT_SETTINGS.touchControlLift;
     return {
       ...DEFAULT_SETTINGS,
       ...parsed,
+      touchControlLift: validLift,
       handling: {
         ...DEFAULT_SETTINGS.handling,
         ...(parsed.handling ?? {}),
