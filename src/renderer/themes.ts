@@ -28,8 +28,8 @@ export interface ThemePalette {
 export const THEMES: Record<ThemeId, ThemePalette> = {
   'neon-prism': {
     id: 'neon-prism',
-    name: 'Neon Prism',
-    subtitle: 'Deep Space Jewel',
+    name: '深空霓虹',
+    subtitle: '深空棱镜',
     boardBgTop: '#070b18',
     boardBgBottom: '#0b1226',
     gridLine: 'rgba(148, 163, 184, 0.085)',
@@ -53,8 +53,8 @@ export const THEMES: Record<ThemeId, ThemePalette> = {
   },
   'zen-frost': {
     id: 'zen-frost',
-    name: 'Zen Frost',
-    subtitle: 'Minimalist Daylight',
+    name: '极简磨砂',
+    subtitle: '白昼极简',
     boardBgTop: '#f8fafc',
     boardBgBottom: '#edf2f7',
     gridLine: 'rgba(15, 23, 42, 0.065)',
@@ -78,8 +78,8 @@ export const THEMES: Record<ThemeId, ThemePalette> = {
   },
   'retro-phosphor': {
     id: 'retro-phosphor',
-    name: 'Retro Phosphor',
-    subtitle: 'CRT Handheld',
+    name: '复古掌机',
+    subtitle: 'CRT 荧光',
     boardBgTop: '#040a05',
     boardBgBottom: '#08130a',
     gridLine: 'rgba(74, 222, 128, 0.1)',

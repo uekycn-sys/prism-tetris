@@ -28,6 +28,25 @@ import type {
   ThemeId,
 } from './types/game';
 
+const CALLOUT_ZH: Record<string, string> = {
+  'MINI T-SPIN': '迷你 T-SPIN',
+  'T-SPIN': 'T-SPIN',
+  'T-SPIN SINGLE': 'T-SPIN 单消',
+  'T-SPIN DOUBLE': 'T-SPIN 双消',
+  'T-SPIN TRIPLE': 'T-SPIN 三消',
+  'MINI T-SPIN SINGLE': '迷你 T-SPIN 单消',
+  'MINI T-SPIN DOUBLE': '迷你 T-SPIN 双消',
+  TETRIS: 'TETRIS 四消',
+  'BACK-TO-BACK': 'B2B 连击',
+  'ALL CLEAR': '全消 ALL CLEAR',
+};
+
+function translateCallout(label: string): string {
+  if (CALLOUT_ZH[label]) return CALLOUT_ZH[label];
+  if (label.startsWith('COMBO x')) return `连消 x${label.slice(7)}`;
+  return label;
+}
+
 export function App() {
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const [leaderboards, setLeaderboards] = useState<LeaderboardMap>(() => loadLeaderboards());
@@ -152,7 +171,7 @@ export function App() {
                   ? 'gold'
                   : 'accent';
             pushCallout(
-              label,
+              translateCallout(label),
               idx === 0 && ev.points > 0 ? `+${ev.points}` : undefined,
               tone
             );
@@ -162,10 +181,10 @@ export function App() {
         case 'levelUp':
           sound.setLevel(ev.level);
           sound.playLevelUp();
-          pushCallout(`LEVEL ${ev.level}`, undefined, 'accent');
+          pushCallout(`等级 ${ev.level}`, undefined, 'accent');
           break;
         case 'zenClear':
-          pushCallout('ZEN REFRESH', `-${ev.clearedRows} ROWS`, 'emerald');
+          pushCallout('禅意清底', `-${ev.clearedRows} 行`, 'emerald');
           break;
         case 'gameOver':
         case 'victory': {
@@ -342,7 +361,7 @@ export function App() {
     setSettings((prev) => ({ ...prev, muted: !prev.muted }));
   }, []);
 
-  // Global keyboard bindings
+    // Global keyboard bindings
   useEffect(() => {
     const findAction = (code: string): ActionName | null => {
       const bindings = settingsRef.current.keyBindings;

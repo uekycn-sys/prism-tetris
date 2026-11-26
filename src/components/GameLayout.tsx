@@ -81,12 +81,12 @@ export function GameLayout({
 
   const modeLabel =
     hud.mode === 'sprint'
-      ? '40L SPRINT'
+      ? '40 行竞速'
       : hud.mode === 'ultra'
-        ? 'ULTRA 2M'
+        ? '2 分钟极速'
         : hud.mode === 'zen'
-          ? 'ZEN FLOW'
-          : 'MARATHON';
+          ? '禅意无尽'
+          : '马拉松';
 
   const linesLabel =
     hud.mode === 'sprint' ? `${hud.lines} / ${SPRINT_TARGET_LINES}` : `${hud.lines}`;
@@ -97,7 +97,7 @@ export function GameLayout({
       <header className="glass-panel mx-2 mt-2 flex shrink-0 items-center justify-between rounded-2xl px-3 py-1.5 md:hidden">
         <div className="flex items-center gap-3">
           <div>
-            <div className="text-[9px] font-bold uppercase tracking-wider text-[var(--accent)]">
+            <div className="text-[9px] font-bold tracking-wider text-[var(--accent)]">
               {modeLabel}
             </div>
             <div className="font-mono-num text-sm font-bold leading-tight">
@@ -106,7 +106,7 @@ export function GameLayout({
           </div>
           <div className="h-5 w-px bg-[var(--surface-border)]" />
           <div className="font-mono-num text-xs">
-            <span className="text-[var(--text-muted)]">L </span>
+            <span className="text-[var(--text-muted)]">行 </span>
             <span className="font-bold">{linesLabel}</span>
           </div>
           <div className="font-mono-num text-xs">
@@ -118,7 +118,7 @@ export function GameLayout({
           <button
             type="button"
             onClick={onCycleTheme}
-            aria-label="Switch Theme"
+            aria-label="切换主题"
             className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10"
           >
             <Palette className="h-4 w-4" />
@@ -126,7 +126,7 @@ export function GameLayout({
           <button
             type="button"
             onClick={onToggleMute}
-            aria-label="Toggle Mute"
+            aria-label="静音开关"
             className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10"
           >
             {settings.muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
@@ -134,7 +134,7 @@ export function GameLayout({
           <button
             type="button"
             onClick={onPause}
-            aria-label="Pause Game"
+            aria-label="暂停游戏"
             className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10"
           >
             <Pause className="h-4 w-4" />
@@ -150,8 +150,8 @@ export function GameLayout({
             {/* Hold Box */}
             <div className="glass-panel rounded-2xl p-3">
               <div className="flex items-center justify-between">
-                <span className="font-display text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
-                  Hold
+                <span className="font-display text-[11px] font-bold tracking-wider text-[var(--text-secondary)]">
+                  暂存 (HOLD)
                 </span>
                 <span className="font-mono-num text-[10px] text-[var(--text-muted)]">C / Shift</span>
               </div>
@@ -170,7 +170,7 @@ export function GameLayout({
             {/* Telemetry Cards */}
             <div className="glass-panel space-y-2.5 rounded-2xl p-3.5">
               <div className="flex items-center justify-between border-b border-[var(--surface-border)] pb-2">
-                <span className="font-display text-[11px] font-bold uppercase tracking-wider text-[var(--accent)]">
+                <span className="font-display text-[11px] font-bold tracking-wider text-[var(--accent)]">
                   {modeLabel}
                 </span>
                 <span className="font-mono-num text-[11px] font-semibold text-[var(--text-secondary)]">
@@ -179,8 +179,8 @@ export function GameLayout({
               </div>
 
               <div>
-                <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-                  Score
+                <div className="text-[10px] tracking-wider text-[var(--text-muted)]">
+                  得分
                 </div>
                 <div className="font-mono-num text-xl font-bold tracking-tight">
                   {hud.score.toLocaleString()}
@@ -189,13 +189,13 @@ export function GameLayout({
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-                    Lines
+                  <div className="text-[10px] tracking-wider text-[var(--text-muted)]">
+                    消除行
                   </div>
                   <div className="font-mono-num text-sm font-bold">{linesLabel}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+                  <div className="text-[10px] tracking-wider text-[var(--text-muted)]">
                     PPS
                   </div>
                   <div className="font-mono-num text-sm font-bold">{hud.pps.toFixed(2)}</div>
@@ -203,8 +203,8 @@ export function GameLayout({
               </div>
 
               <div>
-                <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-                  {hud.mode === 'ultra' ? 'Remaining' : 'Time'}
+                <div className="text-[10px] tracking-wider text-[var(--text-muted)]">
+                  {hud.mode === 'ultra' ? '剩余时间' : '用时'}
                 </div>
                 <div className="font-mono-num text-base font-bold text-[var(--accent)]">
                   {timeDisplay}
@@ -214,12 +214,12 @@ export function GameLayout({
               <div className="flex items-center gap-1.5 pt-1">
                 {hud.b2bActive && (
                   <span className="rounded-md bg-purple-500/20 px-2 py-0.5 text-[10px] font-bold text-purple-300">
-                    B2B READY
+                    B2B 就绪
                   </span>
                 )}
                 {hud.combo > 0 && (
                   <span className="font-mono-num rounded-md bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">
-                    COMBO x{hud.combo}
+                    连消 x{hud.combo}
                   </span>
                 )}
               </div>
@@ -228,24 +228,24 @@ export function GameLayout({
 
           {/* Controls Legend */}
           <div className="glass-panel rounded-2xl p-3 text-[11px] text-[var(--text-secondary)]">
-            <div className="mb-1.5 font-display text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              Shortcuts
+            <div className="mb-1.5 font-display text-[10px] font-bold tracking-wider text-[var(--text-muted)]">
+              快捷操作
             </div>
             <div className="space-y-1">
               <div className="flex justify-between">
-                <span>Move</span>
+                <span>左右移动</span>
                 <span className="font-mono-num">← →</span>
               </div>
               <div className="flex justify-between">
-                <span>Hard / Soft</span>
-                <span className="font-mono-num">Space / ↓</span>
+                <span>硬降 / 软降</span>
+                <span className="font-mono-num">空格 / ↓</span>
               </div>
               <div className="flex justify-between">
-                <span>Rotate</span>
+                <span>旋转</span>
                 <span className="font-mono-num">↑ X / Z / A</span>
               </div>
               <div className="flex justify-between">
-                <span>Pause / Retry</span>
+                <span>暂停 / 重开</span>
                 <span className="font-mono-num">Esc / R</span>
               </div>
             </div>
@@ -255,7 +255,7 @@ export function GameLayout({
         {/* Mobile Left Mini Strip (Hold) */}
         <div className="flex h-full flex-col items-center justify-start gap-2 pt-1 md:hidden">
           <div className="glass-panel flex flex-col items-center rounded-xl p-1.5">
-            <span className="text-[9px] font-bold uppercase text-[var(--text-muted)]">Hold</span>
+            <span className="text-[9px] font-bold text-[var(--text-muted)]">暂存</span>
             <MiniPieceCanvas
               piece={hud.holdPiece}
               themeId={settings.theme}
@@ -266,9 +266,9 @@ export function GameLayout({
             />
           </div>
           <div className="glass-panel flex flex-col items-center rounded-xl px-2 py-1.5 text-center">
-            <span className="text-[9px] uppercase text-[var(--text-muted)]">LV</span>
+            <span className="text-[9px] text-[var(--text-muted)]">等级</span>
             <span className="font-mono-num text-xs font-bold">{hud.level}</span>
-            <span className="mt-1 text-[9px] uppercase text-[var(--text-muted)]">PPS</span>
+            <span className="mt-1 text-[9px] text-[var(--text-muted)]">PPS</span>
             <span className="font-mono-num text-[11px] font-semibold">{hud.pps.toFixed(1)}</span>
           </div>
         </div>
@@ -305,7 +305,7 @@ export function GameLayout({
         {/* Mobile Right Mini Strip (Next 4) */}
         <div className="flex h-full flex-col items-center justify-start gap-1.5 pt-1 md:hidden">
           <div className="glass-panel flex flex-col items-center gap-1 rounded-xl p-1.5">
-            <span className="text-[9px] font-bold uppercase text-[var(--text-muted)]">Next</span>
+            <span className="text-[9px] font-bold text-[var(--text-muted)]">预览</span>
             {hud.nextQueue.slice(0, 4).map((p, idx) => (
               <MiniPieceCanvas
                 key={`${p}-${idx}`}
@@ -324,10 +324,10 @@ export function GameLayout({
           {/* Next Queue (5 pieces) */}
           <div className="glass-panel rounded-2xl p-3">
             <div className="flex items-center justify-between">
-              <span className="font-display text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
-                Next
+              <span className="font-display text-[11px] font-bold tracking-wider text-[var(--text-secondary)]">
+                下一方块
               </span>
-              <span className="font-mono-num text-[10px] text-[var(--text-muted)]">5 Queue</span>
+              <span className="font-mono-num text-[10px] text-[var(--text-muted)]">5 块预览</span>
             </div>
             <div className="mt-2 flex flex-col items-center gap-1.5 rounded-xl bg-black/15 py-2">
               {hud.nextQueue.slice(0, 5).map((p, idx) => (
@@ -356,7 +356,7 @@ export function GameLayout({
             >
               <span className="flex items-center gap-2">
                 <Palette className="h-3.5 w-3.5 text-[var(--accent)]" />
-                Theme
+                主题
               </span>
               <span className="text-[11px] text-[var(--text-secondary)]">
                 {THEMES[settings.theme].name}
@@ -367,11 +367,11 @@ export function GameLayout({
               <button
                 type="button"
                 onClick={onToggleMute}
-                aria-label="Toggle Mute"
+                aria-label="静音开关"
                 className="flex items-center justify-center gap-1.5 rounded-xl bg-white/5 py-2 text-xs font-medium hover:bg-white/10"
               >
                 {settings.muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-                {settings.muted ? 'Muted' : 'Audio'}
+                {settings.muted ? '已静音' : '音效'}
               </button>
               <button
                 type="button"
@@ -379,7 +379,7 @@ export function GameLayout({
                 className="flex items-center justify-center gap-1.5 rounded-xl bg-white/5 py-2 text-xs font-medium hover:bg-white/10"
               >
                 <SettingsIcon className="h-3.5 w-3.5" />
-                Setup
+                设置
               </button>
             </div>
 
@@ -390,7 +390,7 @@ export function GameLayout({
                 className="flex items-center justify-center gap-1.5 rounded-xl bg-white/5 py-2 text-xs font-medium hover:bg-white/10"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
-                Retry
+                重开
               </button>
               <button
                 type="button"
@@ -399,7 +399,7 @@ export function GameLayout({
                 style={{ background: 'var(--accent)', color: 'var(--accent-text)' }}
               >
                 <Pause className="h-3.5 w-3.5" />
-                Pause
+                暂停
               </button>
             </div>
           </div>

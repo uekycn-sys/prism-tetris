@@ -63,17 +63,17 @@ export function TouchControls({
       <div className="flex w-full items-center justify-between gap-2">
         <button
           type="button"
-          aria-label="Touch Hold"
+          aria-label="触控暂存"
           className={`${btnBase} h-9 px-3.5 text-xs font-semibold tracking-wide`}
           onPointerDown={stopAndRun(onHold)}
         >
           <Repeat className="mr-1.5 h-3.5 w-3.5 text-[var(--accent)]" />
-          HOLD
+          暂存
         </button>
 
         <button
           type="button"
-          aria-label="Touch Rotate 180"
+          aria-label="触控 180° 旋转"
           className={`${btnBase} font-mono-num h-9 px-3.5 text-xs font-bold`}
           onPointerDown={stopAndRun(onRotate180)}
         >
@@ -87,7 +87,7 @@ export function TouchControls({
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            aria-label="Touch Left"
+            aria-label="触控左移"
             className={`${btnBase} h-12 w-12`}
             onPointerDown={stopAndRun(onPressLeft)}
             onPointerUp={stopRelease(onReleaseLeft)}
@@ -97,7 +97,7 @@ export function TouchControls({
           </button>
           <button
             type="button"
-            aria-label="Touch Soft Drop"
+            aria-label="触控软降"
             className={`${btnBase} h-12 w-12`}
             onPointerDown={stopAndRun(onPressSoftDrop)}
             onPointerUp={stopRelease(onReleaseSoftDrop)}
@@ -107,7 +107,7 @@ export function TouchControls({
           </button>
           <button
             type="button"
-            aria-label="Touch Right"
+            aria-label="触控右移"
             className={`${btnBase} h-12 w-12`}
             onPointerDown={stopAndRun(onPressRight)}
             onPointerUp={stopRelease(onReleaseRight)}
@@ -121,7 +121,7 @@ export function TouchControls({
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            aria-label="Touch Rotate CCW"
+            aria-label="触控逆时针旋转"
             className={`${btnBase} h-12 w-12`}
             onPointerDown={stopAndRun(onRotateCCW)}
           >
@@ -129,7 +129,7 @@ export function TouchControls({
           </button>
           <button
             type="button"
-            aria-label="Touch Hard Drop"
+            aria-label="触控硬降"
             className="flex h-12 w-13 items-center justify-center rounded-xl font-semibold shadow-md transition-transform active:scale-95 select-none touch-none"
             style={{
               background: 'var(--accent)',
@@ -141,7 +141,7 @@ export function TouchControls({
           </button>
           <button
             type="button"
-            aria-label="Touch Rotate CW"
+            aria-label="触控顺时针旋转"
             className={`${btnBase} h-12 w-12`}
             onPointerDown={stopAndRun(onRotateCW)}
           >

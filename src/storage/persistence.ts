@@ -157,7 +157,7 @@ export function formatKeyCode(code: string): string {
     case 'ArrowDown':
       return '↓';
     case 'Space':
-      return 'Space';
+      return '空格';
     case 'ShiftLeft':
     case 'ShiftRight':
       return 'Shift';
@@ -172,16 +172,16 @@ export function formatKeyCode(code: string): string {
 }
 
 export const ACTION_LABELS: Record<ActionName, string> = {
-  moveLeft: 'Move Left',
-  moveRight: 'Move Right',
-  softDrop: 'Soft Drop',
-  hardDrop: 'Hard Drop',
-  rotateCW: 'Rotate CW',
-  rotateCCW: 'Rotate CCW',
-  rotate180: 'Rotate 180°',
-  hold: 'Hold Piece',
-  pause: 'Pause / Menu',
-  restart: 'Quick Restart',
+  moveLeft: '向左移动',
+  moveRight: '向右移动',
+  softDrop: '软降（加速下落）',
+  hardDrop: '硬降（瞬间落底）',
+  rotateCW: '顺时针旋转',
+  rotateCCW: '逆时针旋转',
+  rotate180: '180° 旋转',
+  hold: '暂存方块 (Hold)',
+  pause: '暂停 / 菜单',
+  restart: '极速重开',
 };
 
 export function formatDurationMs(ms: number): string {

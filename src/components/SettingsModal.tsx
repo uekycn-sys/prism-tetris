@@ -78,20 +78,20 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-3 backdrop-blur-sm sm:p-6"
       role="dialog"
       aria-modal="true"
-      aria-label="Settings"
+      aria-label="游戏设置"
     >
       <div className="glass-modal animate-modal modal-scroll flex max-h-[90dvh] w-full max-w-2xl flex-col overflow-y-auto rounded-3xl p-5 sm:p-6">
         <div className="flex items-center justify-between border-b border-[var(--surface-border)] pb-3.5">
           <div>
-            <h2 className="font-display text-xl font-bold">Settings & Tuning</h2>
+            <h2 className="font-display text-xl font-bold">设置与手感调校</h2>
             <p className="text-xs text-[var(--text-secondary)]">
-              Fine-tune handling, visuals, procedural audio & keybindings
+              精细调节操控参数、视觉主题、程序化音效与自定义键位
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close Settings"
+            aria-label="关闭设置"
             className="glass-panel flex h-8 w-8 items-center justify-center rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           >
             <X className="h-4 w-4" />
@@ -101,13 +101,13 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
         <div className="mt-4 space-y-5">
           {/* Handling Section */}
           <section className="space-y-3">
-            <h3 className="font-display text-xs font-bold uppercase tracking-wider text-[var(--accent)]">
-              Handling & Physics Feel
+            <h3 className="font-display text-xs font-bold tracking-wider text-[var(--accent)]">
+              操控手感与物理参数
             </h3>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="glass-panel rounded-2xl p-3">
                 <div className="flex justify-between text-xs font-medium">
-                  <span>DAS</span>
+                  <span>DAS 首次延迟</span>
                   <span className="font-mono-num text-[var(--accent)]">{settings.handling.das} ms</span>
                 </div>
                 <input
@@ -119,14 +119,14 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
                   onChange={(e) => setHandling('das', Number(e.target.value))}
                   className="mt-2 w-full accent-[var(--accent)]"
                 />
-                <p className="mt-1 text-[10px] text-[var(--text-muted)]">Auto-shift delay (50–250ms)</p>
+                <p className="mt-1 text-[10px] text-[var(--text-muted)]">自动连移延迟 (50–250ms)</p>
               </div>
 
               <div className="glass-panel rounded-2xl p-3">
                 <div className="flex justify-between text-xs font-medium">
-                  <span>ARR</span>
+                  <span>ARR 重复间隔</span>
                   <span className="font-mono-num text-[var(--accent)]">
-                    {settings.handling.arr === 0 ? '0 ms (Instant)' : `${settings.handling.arr} ms`}
+                    {settings.handling.arr === 0 ? '0 ms (瞬间)' : `${settings.handling.arr} ms`}
                   </span>
                 </div>
                 <input
@@ -138,14 +138,14 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
                   onChange={(e) => setHandling('arr', Number(e.target.value))}
                   className="mt-2 w-full accent-[var(--accent)]"
                 />
-                <p className="mt-1 text-[10px] text-[var(--text-muted)]">Repeat interval (0 = snap)</p>
+                <p className="mt-1 text-[10px] text-[var(--text-muted)]">连续移动间隔 (0 = 瞬间贴边)</p>
               </div>
 
               <div className="glass-panel rounded-2xl p-3">
                 <div className="flex justify-between text-xs font-medium">
-                  <span>SDF</span>
+                  <span>SDF 软降倍率</span>
                   <span className="font-mono-num text-[var(--accent)]">
-                    {settings.handling.sdf === 0 ? '∞ Instant' : `${settings.handling.sdf}x`}
+                    {settings.handling.sdf === 0 ? '∞ 瞬间' : `${settings.handling.sdf}x`}
                   </span>
                 </div>
                 <input
@@ -160,7 +160,7 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
                   }}
                   className="mt-2 w-full accent-[var(--accent)]"
                 />
-                <p className="mt-1 text-[10px] text-[var(--text-muted)]">Soft drop speed (max = ∞)</p>
+                <p className="mt-1 text-[10px] text-[var(--text-muted)]">软降加速倍率 (最右 = 瞬间)</p>
               </div>
             </div>
           </section>
@@ -168,8 +168,8 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
           {/* Visuals & Audio */}
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2.5">
-              <h3 className="font-display text-xs font-bold uppercase tracking-wider text-[var(--accent)]">
-                Visuals & Accessibility
+              <h3 className="font-display text-xs font-bold tracking-wider text-[var(--accent)]">
+                视觉与辅助功能
               </h3>
               <div className="glass-panel space-y-2.5 rounded-2xl p-3">
                 <div className="flex gap-1.5">
@@ -196,7 +196,7 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
                 </div>
 
                 <label className="flex cursor-pointer items-center justify-between text-xs">
-                  <span>Colorblind High-Contrast & Symbols</span>
+                  <span>色盲友好高对比与几何标记</span>
                   <input
                     type="checkbox"
                     checked={settings.colorblind}
@@ -206,7 +206,7 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
                 </label>
 
                 <label className="flex cursor-pointer items-center justify-between text-xs">
-                  <span>Impact Micro-Shake & Bounce</span>
+                  <span>落地微震动与弹性反馈</span>
                   <input
                     type="checkbox"
                     checked={settings.screenShake}
@@ -218,13 +218,13 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
             </div>
 
             <div className="space-y-2.5">
-              <h3 className="font-display text-xs font-bold uppercase tracking-wider text-[var(--accent)]">
-                Procedural Web Audio
+              <h3 className="font-display text-xs font-bold tracking-wider text-[var(--accent)]">
+                程序化 Web Audio 音效
               </h3>
               <div className="glass-panel space-y-2.5 rounded-2xl p-3">
                 <div>
                   <div className="flex justify-between text-xs">
-                    <span>SFX Volume</span>
+                    <span>音效音量 (SFX)</span>
                     <span className="font-mono-num">{Math.round(settings.sfxVolume * 100)}%</span>
                   </div>
                   <input
@@ -240,7 +240,7 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
 
                 <div>
                   <div className="flex justify-between text-xs">
-                    <span>Ambient Groove (BGM)</span>
+                    <span>氛围底音 (BGM)</span>
                     <span className="font-mono-num">{Math.round(settings.bgmVolume * 100)}%</span>
                   </div>
                   <input
@@ -260,8 +260,8 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
           {/* Key Bindings */}
           <section className="space-y-2.5">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="font-display text-xs font-bold uppercase tracking-wider text-[var(--accent)]">
-                Key Bindings (Click to Rebind)
+              <h3 className="font-display text-xs font-bold tracking-wider text-[var(--accent)]">
+                按键绑定（点击即可改键）
               </h3>
               <div className="flex items-center gap-1.5">
                 <button
@@ -269,14 +269,14 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
                   onClick={() => onUpdate({ ...settings, keyBindings: DEFAULT_KEY_BINDINGS })}
                   className="glass-panel rounded-lg px-2.5 py-1 text-[11px] font-medium hover:opacity-90"
                 >
-                  Guideline Preset
+                  标准 Guideline 预设
                 </button>
                 <button
                   type="button"
                   onClick={() => onUpdate({ ...settings, keyBindings: WASD_KEY_BINDINGS })}
                   className="glass-panel rounded-lg px-2.5 py-1 text-[11px] font-medium hover:opacity-90"
                 >
-                  WASD Dual Preset
+                  WASD 双手预设
                 </button>
               </div>
             </div>
@@ -297,10 +297,10 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
                     <span className="font-medium">{ACTION_LABELS[action]}</span>
                     <span className="font-mono-num flex items-center gap-1 text-[11px] text-[var(--accent)]">
                       {isListening
-                        ? 'Press any key...'
+                        ? '请按任意键...'
                         : keys.length > 0
                           ? keys.map(formatKeyCode).join(' / ')
-                          : 'Unbound'}
+                          : '未绑定'}
                     </span>
                   </button>
                 );
@@ -316,7 +316,7 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
             className="glass-panel flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           >
             <RotateCcw className="h-3.5 w-3.5" />
-            Reset All Defaults
+            恢复全部默认
           </button>
 
           <button
@@ -325,7 +325,7 @@ export function SettingsModal({ settings, onUpdate, onClose }: SettingsModalProp
             className="rounded-xl px-5 py-2 text-xs font-bold shadow-md"
             style={{ background: 'var(--accent)', color: 'var(--accent-text)' }}
           >
-            Done
+            完成
           </button>
         </div>
       </div>

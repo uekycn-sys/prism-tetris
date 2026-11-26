@@ -18,13 +18,13 @@ export function PauseModal({
       className="fixed inset-0 z-40 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-label="Game Paused"
+      aria-label="游戏已暂停"
     >
       <div className="glass-modal animate-modal w-full max-w-xs rounded-3xl p-6 text-center">
         <p className="font-mono-num text-[11px] font-semibold uppercase tracking-widest text-[var(--accent)]">
-          Paused
+          PAUSED
         </p>
-        <h2 className="font-display mt-1 text-2xl font-bold">Take a Breath</h2>
+        <h2 className="font-display mt-1 text-2xl font-bold">游戏暂停</h2>
 
         <div className="mt-5 flex flex-col gap-2.5">
           <button
@@ -34,7 +34,7 @@ export function PauseModal({
             style={{ background: 'var(--accent)', color: 'var(--accent-text)' }}
           >
             <Play className="h-4 w-4 fill-current" />
-            Resume
+            继续游戏
           </button>
 
           <button
@@ -43,7 +43,7 @@ export function PauseModal({
             className="glass-panel flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium hover:bg-white/5"
           >
             <RotateCcw className="h-4 w-4" />
-            Restart (R)
+            重新开始 (R)
           </button>
 
           <button
@@ -52,7 +52,7 @@ export function PauseModal({
             className="glass-panel flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium hover:bg-white/5"
           >
             <Settings className="h-4 w-4" />
-            Settings
+            游戏设置
           </button>
 
           <button
@@ -61,7 +61,7 @@ export function PauseModal({
             className="glass-panel flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           >
             <Home className="h-4 w-4" />
-            Main Menu
+            返回主菜单
           </button>
         </div>
       </div>

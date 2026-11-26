@@ -35,30 +35,30 @@ interface ModeMeta {
 const MODES: ModeMeta[] = [
   {
     id: 'marathon',
-    title: 'Marathon',
-    tag: 'LV 1–20',
-    desc: 'Classic Guideline progression. Speed climbs every 10 lines.',
+    title: '马拉松',
+    tag: '1–20 级',
+    desc: '经典 Guideline 变速模式，每消除 10 行提升一级下落速度。',
     icon: Flame,
   },
   {
     id: 'sprint',
-    title: '40L Sprint',
-    tag: 'SPEEDRUN',
-    desc: 'Clear 40 lines as fast as possible. Precision & PPS.',
+    title: '40 行竞速',
+    tag: '极速竞速',
+    desc: '以最快速度消除 40 行，精准毫秒计时与实时 PPS 统计。',
     icon: Timer,
   },
   {
     id: 'ultra',
-    title: 'Ultra 2m',
-    tag: '120 SEC',
-    desc: 'Score attack blitz. Chain T-Spins, Tetrises & B2B.',
+    title: '2 分钟极速',
+    tag: '120 秒',
+    desc: '限时 120 秒冲击最高分，连击 T-Spin、四消与 B2B 加成。',
     icon: Zap,
   },
   {
     id: 'zen',
-    title: 'Zen',
-    tag: 'ENDLESS',
-    desc: 'No Game Over. Relaxed flow & T-Spin setup practice.',
+    title: '禅意无尽',
+    tag: '无尽解压',
+    desc: '永不 Game Over，触顶自动渐隐底部，适合练习 T-Spin 摆型。',
     icon: InfinityIcon,
   },
 ];
@@ -76,10 +76,12 @@ export function MainMenu({
 
   const getPersonalBestLabel = (mode: GameMode): string => {
     const top = leaderboards[mode][0];
-    if (!top) return 'No record yet';
-    if (mode === 'sprint') return `Best ${formatDurationMs(top.elapsedMs)}`;
-    return `Best ${top.score.toLocaleString()}`;
+    if (!top) return '暂无记录';
+    if (mode === 'sprint') return `最佳 ${formatDurationMs(top.elapsedMs)}`;
+    return `最高 ${top.score.toLocaleString()}`;
   };
+
+  const selectedMeta = MODES.find((m) => m.id === selectedMode)!;
 
   return (
     <div className="relative flex h-dvh w-screen flex-col items-center justify-center overflow-hidden p-3 sm:p-6">
@@ -99,7 +101,7 @@ export function MainMenu({
                   PRISM TETRIS
                 </h1>
                 <p className="text-xs text-[var(--text-secondary)]">
-                  Modern Guideline Engine · SRS · T-Spin · 144Hz Ready
+                  现代竞技规范 · SRS 踢墙 · T-Spin · 144Hz 丝滑适配
                 </p>
               </div>
             </div>
@@ -108,7 +110,7 @@ export function MainMenu({
           {/* Theme Switcher + Quick Actions */}
           <div className="flex items-center gap-2">
             <div className="glass-panel flex items-center gap-1 rounded-xl p-1">
-              <Palette className="ml-1.5 h-3.5 w-3.5 text-[var(--text-secondary)] hidden sm:block" />
+              <Palette className="ml-1.5 hidden h-3.5 w-3.5 text-[var(--text-secondary)] sm:block" />
               {THEME_ORDER.map((tid) => {
                 const active = settings.theme === tid;
                 return (
@@ -136,7 +138,7 @@ export function MainMenu({
             <button
               type="button"
               onClick={onToggleMute}
-              aria-label={settings.muted ? 'Unmute Audio' : 'Mute Audio'}
+              aria-label={settings.muted ? '开启声音' : '静音'}
               className="glass-panel flex h-9 w-9 items-center justify-center rounded-xl text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
             >
               {settings.muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
@@ -145,11 +147,11 @@ export function MainMenu({
             <button
               type="button"
               onClick={onOpenSettings}
-              aria-label="Open Settings"
+              aria-label="打开设置"
               className="glass-panel flex h-9 items-center gap-1.5 rounded-xl px-3 text-xs font-medium text-[var(--text-primary)] transition-opacity hover:opacity-90"
             >
               <SettingsIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">Settings</span>
+              <span className="hidden sm:inline">设置</span>
             </button>
           </div>
         </div>
@@ -199,8 +201,8 @@ export function MainMenu({
                     <span className="font-mono-num text-[var(--text-muted)]">
                       {getPersonalBestLabel(m.id)}
                     </span>
-                    <span className="font-semibold text-[var(--accent)] opacity-90 group-hover:translate-x-0.5 transition-transform">
-                      Select →
+                    <span className="font-semibold text-[var(--accent)] opacity-90 transition-transform group-hover:translate-x-0.5">
+                      选择 →
                     </span>
                   </div>
                 </button>
@@ -214,17 +216,17 @@ export function MainMenu({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Trophy className="h-4 w-4 text-[var(--warning)]" />
-                  <h3 className="font-display text-sm font-bold uppercase tracking-wider">
-                    {MODES.find((m) => m.id === selectedMode)?.title} Top 5
+                  <h3 className="font-display text-sm font-bold tracking-wider">
+                    {selectedMeta.title} Top 5
                   </h3>
                 </div>
-                <span className="text-[11px] text-[var(--text-muted)]">Local Best</span>
+                <span className="text-[11px] text-[var(--text-muted)]">本地排行</span>
               </div>
 
               <div className="mt-3 space-y-1.5">
                 {activeRecords.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-[var(--surface-border)] px-3 py-6 text-center text-xs text-[var(--text-muted)]">
-                    No completed runs yet. Set the first benchmark!
+                    暂无完成记录，快来创造首个纪录！
                   </div>
                 ) : (
                   activeRecords.map((rec, idx) => (
@@ -243,7 +245,7 @@ export function MainMenu({
                         </span>
                       </div>
                       <div className="font-mono-num flex items-center gap-2.5 text-[11px] text-[var(--text-secondary)]">
-                        <span>{rec.lines}L</span>
+                        <span>{rec.lines} 行</span>
                         <span>{rec.pps.toFixed(2)} PPS</span>
                       </div>
                     </div>
@@ -260,10 +262,10 @@ export function MainMenu({
                 style={{ background: 'var(--accent)', color: 'var(--accent-text)' }}
               >
                 <Play className="h-4 w-4 fill-current" />
-                Start {MODES.find((m) => m.id === selectedMode)?.title}
+                开始{selectedMeta.title}
               </button>
               <p className="text-center text-[11px] text-[var(--text-muted)]">
-                Tip: Arrows/WASD move · Space Hard Drop · Z/X/A Rotate · C Hold
+                提示：方向键移动 · 空格硬降 · Z / X / A 旋转 · C 暂存
               </p>
             </div>
           </div>
